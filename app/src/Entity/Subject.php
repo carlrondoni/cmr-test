@@ -65,7 +65,7 @@ class Subject
     {
         if (!$this->projects->contains($project)) {
             $this->projects[] = $project;
-            $project->addName($this);
+            $project->addSubject($this);
         }
 
         return $this;
@@ -74,7 +74,7 @@ class Subject
     public function removeProject(Project $project): self
     {
         if ($this->projects->removeElement($project)) {
-            $project->removeName($this);
+            $project->removeSubject($this);
         }
 
         return $this;

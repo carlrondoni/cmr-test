@@ -29,6 +29,11 @@ class Project
      */
     private $name;
 
+    public function __construct()
+    {
+        $this->subjects = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -40,10 +45,32 @@ class Project
     }
 
     /**
+     * Set the value of name
+     *
+     * @return  self
+     */ 
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
      * Get the value of subjects
      */ 
     public function getSubjects()
     {
         return $this->subjects;
+    }
+
+    public function addSubject(Subject $subject): self
+    {
+        if (!$this->subjects->contains($subject)) {
+            $this->subjects[] = $subject;
+            $subject->addProject($this);
+        }
+
+        return $this;
     }
 }

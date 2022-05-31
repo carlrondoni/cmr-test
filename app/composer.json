@@ -85,10 +85,24 @@
             "rm -rf app/cache/*",
             "rm -rf var/cache/*"
         ],
+        "create-database": [
+            "php bin/console d:d:d --force --if-exists",
+            "php bin/console d:d:c",
+            "php bin/console d:s:c"
+        ],
+        "update-database": [
+            "php bin/console d:d:c --if-not-exists",
+            "php bin/console d:s:u -f"
+        ],
+        "tests": [
+            "php bin/phpunit"
+        ],
         "first": [
             "@clean-cache",
-            "bash mysql.sh",
             "@dependencies",
+            "@create-database",
+            "php bin/console d:m:m --no-interaction",
+            "@tests",
             "@clean-cache"
         ]
     },
