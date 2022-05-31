@@ -1,0 +1,46 @@
+
+version: "3.1"
+
+services:
+    nginx-ssl:
+        image: nginx:latest
+        container_name: cmr-test-nginx
+        volumes:
+            - ./app:/var/www/html
+            - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - ./docker/nginx/certs:/usr/local/share/ca-certificates
+        depends_on:
+            - php
+        ports:
+            - "81:80"
+            - "444:443"
+
+    php:
+        build: ./docker/php/
+        container_name: cmr-test-php
+        volumes:
+            - ./app:/var/www/html
+        environment:
+            - "MYSQL_PORT=3308"
+
+    mysql:
+        image: mysql:8
+        container_name: cmr-test-db
+        volumes:
+            - ./app:/var/www/html
+            - ./db:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=secret
+            - MYSQL_DATABASE=project
+        ports:
+            - "3308:3306"
+
+    pma:
+        image: phpmyadmin/phpmyadmin:latest
+        container_name: cmr-test-pma
+        depends_on:
+            - mysql
+        ports:
+            - "8080:80"
+        environment:
+            - PMA_HOST=cmr-test-db
