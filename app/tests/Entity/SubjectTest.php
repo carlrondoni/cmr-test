@@ -5,6 +5,7 @@ namespace Tests\Entity;
 
 use App\Entity\Project;
 use App\Entity\Subject;
+use App\Entity\SubjectProject;
 use PHPUnit\Framework\TestCase;
 
 final class SubjectTest extends TestCase
@@ -26,12 +27,13 @@ final class SubjectTest extends TestCase
 
     public function testSubjectProjects()
     {
-        $project = new Project();
-        $project->setName('Project Test');
-        $this->assertSame('Project Test', $project->getName());
-        
         $subject = new Subject();
-        $subject->addProject($project);
+        $this->assertSame(0, count($subject->getProjects()));
+        
+        $subjectProject = new SubjectProject();
+        $subjectProject->setProjectId(1);
+        
+        $subject->addProject($subjectProject);
         $this->assertSame(1, count($subject->getProjects()));
     }
 }

@@ -1,7 +1,7 @@
 FROM php:7-fpm
 
 RUN apt-get update \
-     && apt-get install -y libzip-dev
+     && apt-get install -y libzip-dev openssl
 
 RUN docker-php-ext-install pdo_mysql zip
 

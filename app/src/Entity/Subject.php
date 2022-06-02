@@ -2,18 +2,39 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
-use App\Repository\SubjectRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use DateTime;
+use App\Entity\SubjectProject;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\SubjectRepository;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 
 /**
- * @ApiResource()
+ * @ApiResource(
+ *      collectionOperations={"get","post"},
+ *      itemOperations={
+ *          "get",
+ *          "put",
+ *          "delete",
+ *          "add_project": {
+ *              "method": "PUT",
+ *              "path": "/subjects/{id}/projects/{projectId}",
+ *              "controller": SubjectAddProject::class
+ *          }
+ *      }
+ * )
  * @ORM\Entity(repositoryClass=SubjectRepository::class)
+ * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false, hardDelete=true)
  */
 class Subject
 {
+    use TimestampableEntity;
+    use SoftDeleteableEntity;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -27,13 +48,24 @@ class Subject
     private $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Project::class, mappedBy="subjects")
+     * @ORM\ManyToMany(targetEntity="SubjectProject")
+     * @ORM\JoinTable(
+     *      name="subject_projects",
+     *      joinColumns={@ORM\JoinColumn(name="subject_id", referencedColumnName="id")},
+     *      inverseJoinColumns={
+     *          @ORM\JoinColumn(name="project_id", referencedColumnName="id",onDelete="CASCADE")
+     *      }
+     * )
      */
     private $projects;
 
     public function __construct()
     {
         $this->projects = new ArrayCollection();
+        if(!$this->createdAt) {
+            $this->createdAt = new DateTime();
+        }
+        $this->updatedAt = new DateTime();
     }
 
     public function getId(): ?int
@@ -61,17 +93,16 @@ class Subject
         return $this->projects;
     }
 
-    public function addProject(Project $project): self
+    public function addProject(SubjectProject $project): self
     {
         if (!$this->projects->contains($project)) {
             $this->projects[] = $project;
-            $project->addSubject($this);
         }
 
         return $this;
     }
 
-    public function removeProject(Project $project): self
+    public function removeProject(SubjectProject $project): self
     {
         if ($this->projects->removeElement($project)) {
             $project->removeSubject($this);
