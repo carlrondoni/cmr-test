@@ -5,6 +5,7 @@ namespace App\Entity;
 use DateTime;
 use App\Entity\SubjectProject;
 use Doctrine\ORM\Mapping as ORM;
+use App\Controller\SubjectAddProject;
 use App\Repository\SubjectRepository;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\Common\Collections\Collection;
@@ -22,7 +23,7 @@ use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
  *          "delete",
  *          "add_project": {
  *              "method": "PUT",
- *              "path": "/subjects/{id}/projects/{projectId}",
+ *              "path": "/subjects/{id}/projects",
  *              "controller": SubjectAddProject::class
  *          }
  *      }
@@ -48,7 +49,7 @@ class Subject
     private $name;
 
     /**
-     * @ORM\ManyToMany(targetEntity="SubjectProject")
+     * @ORM\ManyToMany(targetEntity="SubjectProject", cascade={"persist"})
      * @ORM\JoinTable(
      *      name="subject_projects",
      *      joinColumns={@ORM\JoinColumn(name="subject_id", referencedColumnName="id")},
@@ -109,5 +110,17 @@ class Subject
         }
 
         return $this;
+    }
+
+    public function hasProjectId($projectId)
+    {
+
+        foreach ($this->projects as $subjectProject) {
+            if ($subjectProject->getProjectId() === $projectId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
